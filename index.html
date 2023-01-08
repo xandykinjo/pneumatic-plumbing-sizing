@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="index.css">
+    <link rel="shortcut icon" href="./public/plumber.png" type="image/x-icon">
+    <!-- PyScript -->
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+
+    <title>Pneumatic Plumbing Sizing</title>
+</head>
+<body>  
+    <py-config type="json" src="./pyconf.json"></py-config>
+
+    <script>
+        
+        function getEspecs() {
+
+            especsObj = {
+                ...(document.getElementById("vazao").value && {"Q": document.getElementById("vazao").value}),
+                ...(document.getElementById("comprimento").value && {"L": document.getElementById("comprimento").value}),
+                ...(document.getElementById("pressao").value && {"P": document.getElementById("pressao").value}),
+                ...(document.getElementById("queda_pressao").value && {"dP": document.getElementById("queda_pressao").value})
+            }
+
+            return JSON.stringify(especsObj)
+
+        }
+
+        function getSings() {
+            singsObj = {
+
+                ...(document.getElementById("cotovelo_90_comum").value && {"cotovelo_90_comum": {
+                    "qtd": document.getElementById("cotovelo_90_comum").value,
+                    "type": document.querySelector("input[name='cotovelo_90_comum_type']:checked").value
+                }}),
+                ...(document.getElementById("curva_90_raio_longo").value && {"curva_90_raio_longo": {
+                    "qtd": document.getElementById("curva_90_raio_longo").value,
+                    "type": document.querySelector("input[name='curva_90_raio_longo_type']:checked").value
+                }}),
+                ...(document.getElementById("curva_45").value && {"curva_45": {
+                    "qtd": document.getElementById("curva_45").value,
+                    "type": document.querySelector("input[name='curva_45_type']:checked").value
+                }}),
+                ...(document.getElementById("curva_180_raio_longo").value && {"curva_180_raio_longo": {
+                    "qtd": document.getElementById("curva_180_raio_longo").value,
+                    "type": document.querySelector("input[name='curva_180_raio_longo_type']:checked").value
+                }}),
+                ...(document.getElementById("te_fluxo_linha").value && {"te_fluxo_linha": {
+                    "qtd": document.getElementById("te_fluxo_linha").value,
+                    "type": document.querySelector("input[name='te_fluxo_linha_type']:checked").value
+                }}),
+                ...(document.getElementById("te_fluxo_ramal").value && {"te_fluxo_ramal": {
+                    "qtd": document.getElementById("te_fluxo_ramal").value,
+                    "type": document.querySelector("input[name='te_fluxo_ramal_type']:checked").value
+                }}),
+                ...(document.getElementById("valvula_gaveta").value && {"valvula_gaveta": {
+                    "qtd": document.getElementById("valvula_gaveta").value,
+                    "type": document.querySelector("input[name='valvula_gaveta_type']:checked").value
+                }}),
+                ...(document.getElementById("valvula_globo").value && {"valvula_globo": {
+                    "qtd": document.getElementById("valvula_globo").value,
+                    "type": document.querySelector("input[name='valvula_globo_type']:checked").value
+                }}),
+                ...(document.getElementById("valvula_angular").value && {"valvula_angular": {
+                    "qtd": document.getElementById("valvula_angular").value,
+                    "type": document.querySelector("input[name='valvula_angular_type']:checked").value
+                }}),
+                ...(document.getElementById("valvula_retencao_portinhola").value && {"valvula_retencao_portinhola": {
+                    "qtd": document.getElementById("valvula_retencao_portinhola").value,
+                    "type": document.querySelector("input[name='valvula_retencao_portinhola_type']:checked").value
+                }}),
+                ...(document.getElementById("uniao_filtroy").value && {"uniao_filtroy": {
+                    "qtd": document.getElementById("uniao_filtroy").value,
+                    "type": document.querySelector("input[name='uniao_filtroy_type']:checked").value
+                }}),
+
+            }
+
+            return JSON.stringify(singsObj)
+        }
+
+    </script>
+
+    <py-script>
+        from index import diametro_nominal, singularidades
+        from js import getEspecs, getSings
+        
+        def calculate():
+            especsValues = getEspecs()
+            singsValues = getSings()
+
+            print("Sem singularidades:")
+            res_before_sings = diametro_nominal(especsValues, None)
+            
+            print("Com singularidades:")
+            L_sings = singularidades(singsValues, res_before_sings)
+            res_after_sing = diametro_nominal(especsValues, L_sings)
+
+    </py-script>
+    
+    <h1 id="titulo">Dimensionamento de Linhas Pneumáticas</h1>
+
+    <div class="content">
+        <div class="especificacoes">
+            <h2>Especificações</h2>
+            <div class="especificacoes_inputs">
+                <label for="vazao">Vazão (Q [m&sup3;/h])</label>
+                <input class="especsInput" type="text" name="vazao" id="vazao">
+                <label for="comprimento">Comprimento (L [m])</label>
+                <input class="especsInput" type="text" name="comprimento" id="comprimento">
+                <label for="pressao">Pressão (P [kgf/cm&sup2;])</label>
+                <input class="especsInput" type="text" name="pressao" id="pressao">
+                <label for="queda_pressao">Queda de Pressão (&Delta;P [kgf/cm&sup2;])</label>
+                <input class="especsInput" type="text" name="queda_pressao" id="queda_pressao">
+            </div>
+        </div>
+        <div class="singularidades">
+            <h2>Singularidades</h2>
+            <div class="singularidades_inputs">
+                <label for="cotovelo_90_comum">Cotovelo 90° comum</label>
+                <input type="number" name="cotovelo_90_comum" id="cotovelo_90_comum">
+                <span class="singsSpan">
+                    <label for="cotovelo_90_comum_rosqueado">Rosqueado</label>
+                    <input type="radio" name="cotovelo_90_comum_type" id="cotovelo_90_comum_rosqueado" value="rosqueado">
+                    <label for="cotovelo_90_comum_rosqueado">Flanqueado</label>
+                    <input type="radio" name="cotovelo_90_comum_type" id="cotovelo_90_comum_flanqueado" value="flanqueado">
+                </span>
+
+                <label for="curva_90_raio_longo">Curva 90° raio longo</label>
+                <input type="number" name="curva_90_raio_longo" id="curva_90_raio_longo">
+                <span class="singsSpan">
+                    <label for="curva_90_raio_longo_rosqueado">Rosqueado</label>
+                    <input type="radio" name="curva_90_raio_longo_type" id="curva_90_raio_longo_rosqueado" value="rosqueado">
+                    <label for="curva_90_raio_longo_flanqueado">Flanqueado</label>
+                    <input type="radio" name="curva_90_raio_longo_type" id="curva_90_raio_longo_flanqueado" value="flanqueado">
+                </span>
+
+                <label for="curva_45">Curva 45°</label>
+                <input type="number" name="curva_45" id="curva_45">
+                <span class="singsSpan">
+                    <label for="curva_45_rosqueado">Rosqueado</label>
+                    <input type="radio" name="curva_45_type" id="curva_45_rosqueado" value="rosqueado">
+                    <label for="curva_45_flanqueado">Flanqueado</label>
+                    <input type="radio" name="curva_45_type" id="curva_45_flanqueado" value="flanqueado">
+                </span>
+
+                <label for="curva_180_raio_longo">Curva 180° raio longo</label>
+                <input type="number" name="curva_180_raio_longo" id="curva_180_raio_longo">
+                <span class="singsSpan">
+                    <label for="curva_180_raio_longo_rosqueado">Rosqueado</label>
+                    <input type="radio" name="curva_180_raio_longo_type" id="curva_180_raio_longo_rosqueado" value="rosqueado">
+                    <label for="curva_180_raio_longo_flanqueado">Flanqueado</label>
+                    <input type="radio" name="curva_180_raio_longo_type" id="curva_180_raio_longo_flanqueado" value="flanqueado">
+                </span>
+
+                <label for="te_fluxo_linha">Tê fluxo em linha</label>
+                <input type="number" name="te_fluxo_linha" id="te_fluxo_linha">
+                <span class="singsSpan">
+                    <label for="te_fluxo_linha_rosqueado">Rosqueado</label>
+                    <input type="radio" name="te_fluxo_linha_type" id="te_fluxo_linha_rosqueado" value="rosqueado">
+                    <label for="te_fluxo_linha_flanqueado">Flanqueado</label>
+                    <input type="radio" name="te_fluxo_linha_type" id="te_fluxo_linha_flanqueado" value="flanqueado">
+                </span>
+
+                <label for="te_fluxo_ramal">Tê fluxo pelo ramal</label>
+                <input type="number" name="te_fluxo_ramal" id="te_fluxo_ramal">
+                <span class="singsSpan">
+                    <label for="te_fluxo_ramal_rosqueado">Rosqueado</label>
+                    <input type="radio" name="te_fluxo_ramal_type" id="te_fluxo_ramal_rosqueado" value="rosqueado">
+                    <label for="te_fluxo_ramal_flanqueado">Flanqueado</label>
+                    <input type="radio" name="te_fluxo_ramal_type" id="te_fluxo_ramal_flanqueado" value="flanqueado">
+                </span>
+
+                <label for="valvula_gaveta">Válvula gaveta</label>
+                <input type="number" name="valvula_gaveta" id="valvula_gaveta">
+                <span class="singsSpan">
+                    <label for="valvula_gaveta_rosqueado">Rosqueado</label>
+                    <input type="radio" name="valvula_gaveta_type" id="valvula_gaveta_rosqueado" value="rosqueado">
+                    <label for="valvula_gaveta_flanqueado">Flanqueado</label>
+                    <input type="radio" name="valvula_gaveta_type" id="valvula_gaveta_flanqueado" value="flanqueado">
+                </span>
+
+                <label for="valvula_globo">Váuvula globo</label>
+                <input type="number" name="valvula_globo" id="valvula_globo">
+                <span class="singsSpan">
+                    <label for="valvula_globo_rosqueado">Rosqueado</label>
+                    <input type="radio" name="valvula_globo_type" id="valvula_globo_rosqueado" value="rosqueado">
+                    <label for="valvula_globo_flanqueado">Flanqueado</label>
+                    <input type="radio" name="valvula_globo_type" id="valvula_globo_flanqueado" value="flanqueado">
+                </span>
+
+                <label for="valvula_angular">Válvula angular</label>
+                <input type="number" name="valvula_angular" id="valvula_angular">
+                <span class="singsSpan">
+                    <label for="valvula_angular_rosqueado">Rosqueado</label>
+                    <input type="radio" name="valvula_angular_type" id="valvula_angular_rosqueado" value="rosqueado">
+                    <label for="valvula_angular_flanqueado">Flanqueado</label>
+                    <input type="radio" name="valvula_angular_type" id="valvula_angular_flanqueado" value="flanqueado">
+                </span>
+
+                <label for="valvula_retencao_portinhola">Válvula retenção portinhola</label>
+                <input type="number" name="valvula_retencao_portinhola" id="valvula_retencao_portinhola">
+                <span class="singsSpan">
+                    <label for="valvula_retencao_portinhola_rosqueado">Rosqueado</label>
+                    <input type="radio" name="valvula_retencao_portinhola_type" id="valvula_retencao_portinhola_rosqueado" value="rosqueado">
+                    <label for="valvula_retencao_portinhola_flanqueado">Flanqueado</label>
+                    <input type="radio" name="valvula_retencao_portinhola_type" id="valvula_retencao_portinhola_flanqueado" value="flanqueado">
+                </span>
+
+                <label for="uniao_filtroy">União filtro Y</label>
+                <input type="number" name="uniao_filtroy" id="uniao_filtroy">
+                <span class="singsSpan">
+                    <label for="uniao_filtroy_rosqueado">Rosqueado</label>
+                    <input type="radio" name="uniao_filtroy_type" id="uniao_filtroy_rosqueado" value="rosqueado">
+                    <label for="uniao_filtroy_flanqueado">Flanqueado</label>
+                    <input type="radio" name="uniao_filtroy_type" id="uniao_filtroy_flanqueado" value="flanqueado">
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="btn"><button id="calcularBtn" py-onClick="calculate()">Calcular</button></div>
+
+</body>
+</html>

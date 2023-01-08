@@ -1,0 +1,12 @@
+{
+  "packages": [
+    "numpy",
+    "pandas"
+  ],
+  "fetch": [{
+    "from": "./",
+    "files": [
+      "index.py", "/public/Norma_ASTM_A_120_Schedule_40.csv", "/public/cotovelo_comum_90.csv", "/public/curva_90_raio_longo.csv", "/public/curva_45.csv", "/public/curva_180_raio_longo.csv", "/public/te_fluxo_linha.csv", "/public/te_fluxo_ramal.csv", "/public/valvula_gaveta.csv", "/public/valvula_globo.csv", "/public/valvula_angular.csv", "/public/valvula_retencao_portinhola.csv", "/public/uniao_filtroy.csv"
+    ]
+  }]
+}
